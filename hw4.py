@@ -2,6 +2,7 @@ import re
 import sys
 from bs4 import BeautifulSoup
 from urllib import parse, request
+import time
 
 #EBAY
 def getInfoFromCard_ebay(listItem, game):
@@ -119,6 +120,37 @@ def get_video_games_new_egg(url, html, game):
             results.append(res)
     return results
 
+#GAMEOVERGAMES
+def getInfoFromCard_game_over_games(listItem, game):
+    soup = BeautifulSoup(listItem, 'html.parser')
+
+    #get the title and price from the div components
+    header = soup.find("div", {"class":"element"})
+    title = header['data-alpha']
+    price = header['data-price']
+    price = float(price)/100
+    
+
+    title_matcher = re.compile(r".{0,20}" + re.escape(game) + r".{0,40}")
+    if not title_matcher.match(title) or title.index(game) + len(game) < len(title) - 40:
+        #if the title does not match the regex, do not include this game in the results
+        return
+
+    link = "https://gameovervideogames.com/" + soup.find('a', {"class":"hoverBorder"})['href']
+
+    if price is not 0 and title is not '' and link is not '':
+        return (title, price, link)
+
+def get_video_games_game_over_games(url, html, game):
+    results = []
+    soup = BeautifulSoup(html, 'html.parser')
+    for listItem in soup.find_all("div", {"class":"element"}):
+        res = getInfoFromCard_game_over_games(str(listItem), game)     
+        if res is not None:
+            results.append(res)
+    return results
+
+
 if __name__ == '__main__':
     #main()
     game = sys.argv[1]
@@ -138,14 +170,21 @@ if __name__ == '__main__':
     html = req.read()
     newEgg_results =  get_video_games_new_egg(urlNewEgg, html, game)
 
+    urlGameOverGames = "https://gameovervideogames.com/search?type=product&q=" + game.replace(" ", "+")
+    req = request.urlopen(urlGameOverGames)
+    html = req.read()
+    gameOverGame_results = get_video_games_game_over_games(urlGameOverGames, html, game)
+
     
     results = []
     for i in ebay_results:
-        results.append(i)
+       results.append(i)
     for i in deepdiscount_results:
-        results.append(i)
+       results.append(i)
     for i in newEgg_results:
-        results.append(i) 
+       results.append(i) 
+    for i in gameOverGame_results:
+        results.append(i)
 
 
     results.sort(key=lambda x:x[1])
@@ -153,4 +192,4 @@ if __name__ == '__main__':
 
 
     for i in results:
-       print(i)
+      print(i)
