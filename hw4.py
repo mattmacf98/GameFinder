@@ -8,7 +8,8 @@ import time
 def getInfoFromCard_ebay(listItem, game):
     soup = BeautifulSoup(listItem, 'html.parser')
 
-    string = listItem
+    string = listItem.lower()
+    string = re.sub(r"[,.:!?()*&^%$#@+]","",string)
 
     title_matcher = re.compile(r"<h3 class=\"s-item__title\">.{0,20}" + re.escape(game) + r".{0,40}</h3>")
     t = title_matcher.search(string)
@@ -54,6 +55,8 @@ def getInfoFromCard_deep_discount(listItem, game):
     if title_sp is None:
         return
     title = title_sp.text
+    title = title.lower()
+    title = re.sub(r"[,.:!?()*&^%$#@+-_]","",title)
     title_matcher = re.compile(r".{0,20}" + re.escape(game) + r".{0,40}")
     if not title_matcher.match(title) or title.index(game) + len(game) < len(title) - 40:
         #if the title does not match the regex, do not include this game in the results
@@ -92,6 +95,8 @@ def getInfoFromCard_new_egg(listItem, game):
     #get the header for the card whichc contains the link and title
     header = soup.find("a", {"class":"item-title"})
     title = header.text
+    title = title.lower()
+    title = re.sub(r"[,.:!?()*&^%$#@+-_]","",title)
     link = header['href']
 
     title_matcher = re.compile(r".{0,20}" + re.escape(game) + r".{0,40}")
@@ -127,6 +132,8 @@ def getInfoFromCard_game_over_games(listItem, game):
     #get the title and price from the div components
     header = soup.find("div", {"class":"element"})
     title = header['data-alpha']
+    title = title.lower()
+    title = re.sub(r"[,.:!?()*&^%$#@+-_]","",title)
     price = header['data-price']
     price = float(price)/100
     
@@ -154,6 +161,8 @@ def get_video_games_game_over_games(url, html, game):
 if __name__ == '__main__':
     #main()
     game = sys.argv[1]
+    game = game.lower()
+    game = re.sub(r"[,.:!?()*&^%$#@+-_]","",game)
 
     urlEbay="https://www.ebay.com/sch/i.html?_from=R40&_nkw=" + game.replace(" ","+") + "&LH_BIN=1"
     req = request.urlopen(urlEbay)
