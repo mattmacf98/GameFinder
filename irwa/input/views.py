@@ -18,7 +18,8 @@ def get_game(request):
         if form.is_valid():
             print(form.cleaned_data['title'])
             title = form.cleaned_data['title']
-            game_search(title)
+            results = game_search(title)
+            request.session['results'] = results
             # process the data in form.cleaned_data as required
 
             # ...
@@ -61,9 +62,15 @@ def game_search(title):
 
     results.sort(key=lambda x: x[1])
 
-    for i in results:
-        print(i)
+    return results
 
+
+def display_results(request):
+    if 'results' in request.session:
+        results = request.session['results']
+        return render(request, 'results.html', {'results': results})
+    else:
+        return render(request, 'results.html')
 
 
 def home(request):
