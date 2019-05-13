@@ -4,10 +4,10 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from urllib import request
-
 from .forms import GameForm
 from input import hw4
 
+import re
 
 def get_game(request):
     print("got hererunserv")
@@ -18,8 +18,7 @@ def get_game(request):
         if form.is_valid():
             print(form.cleaned_data['title'])
             title = form.cleaned_data['title']
-            results = game_search(title)
-            request.session['results'] = results
+            request.session['results'] = game_search(title)
             # process the data in form.cleaned_data as required
 
             # ...
@@ -35,6 +34,8 @@ def get_game(request):
 
 
 def game_search(title):
+    title = title.lower()
+    title = re.sub(r"[,:\.!\?']", "", title)
 
     urlEbay = "https://www.ebay.com/sch/i.html?_from=R40&_nkw=" + title.replace(" ", "+") + "&LH_BIN=1"
     req = request.urlopen(urlEbay)
@@ -52,12 +53,19 @@ def game_search(title):
     html = req.read()
     newEgg_results = hw4.get_video_games_new_egg(urlNewEgg, html, title)
 
+    urlGameOverGames = "https://gameovervideogames.com/search?type=product&q=" + title.replace(" ", "+")
+    req = request.urlopen(urlGameOverGames)
+    html = req.read()
+    gameOverGame_results = hw4.get_video_games_game_over_games(urlGameOverGames, html, title)
+
     results = []
     for i in ebay_results:
         results.append(i)
     for i in deepdiscount_results:
         results.append(i)
     for i in newEgg_results:
+        results.append(i)
+    for i in gameOverGame_results:
         results.append(i)
 
     results.sort(key=lambda x: x[1])
