@@ -1,8 +1,71 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 
-# Create your views here.
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from urllib import request
+
+from .forms import GameForm
+from input import hw4
+
+
+def get_game(request):
+    print("got hererunserv")
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = GameForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            print(form.cleaned_data['title'])
+            title = form.cleaned_data['title']
+            game_search(title)
+            # process the data in form.cleaned_data as required
+
+            # ...
+            # redirect to a new URL:
+            return HttpResponseRedirect('/results/')
+
+        # if a GET (or any other method) we'll create a blank form
+    else:
+        print("sup")
+        form = GameForm()
+
+    return render(request, 'home.html', {'form': form})
+
+
+def game_search(title):
+
+    urlEbay = "https://www.ebay.com/sch/i.html?_from=R40&_nkw=" + title.replace(" ", "+") + "&LH_BIN=1"
+    req = request.urlopen(urlEbay)
+    html = req.read()
+    ebay_results = hw4.get_video_games_ebay(urlEbay, html, title)
+
+    urlDeepDiscount = "https://www.deepdiscount.com/search?q=" + title.replace(" ", "+")
+    req = request.urlopen(urlDeepDiscount)
+    html = req.read()
+    deepdiscount_results = hw4.get_video_games_deep_discount(urlDeepDiscount, html, title)
+
+    urlNewEgg = "https://www.newegg.com/Product/ProductList.aspx?Submit=ENE&DEPA=0&Order=BESTMATCH&Description=" + title.replace(
+        " ", "+")
+    req = request.urlopen(urlNewEgg)
+    html = req.read()
+    newEgg_results = hw4.get_video_games_new_egg(urlNewEgg, html, title)
+
+    results = []
+    for i in ebay_results:
+        results.append(i)
+    for i in deepdiscount_results:
+        results.append(i)
+    for i in newEgg_results:
+        results.append(i)
+
+    results.sort(key=lambda x: x[1])
+
+    for i in results:
+        print(i)
+
 
 
 def home(request):
-    return HttpResponse('Hello World!')
+    #print("hello")
+    return render(request, 'home.html')
