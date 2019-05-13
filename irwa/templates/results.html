@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Results</title>
+</head>
+<body>
+<input type=button value="Back to Search" style="width:197px" onClick="javascript:history.go(-1);">
+<p style="font-size:28px;">Results (from least to most expensive):</p>
+
+<br>
+
+{% for result in results %}
+    {{ result }}
+    <br><br>
+{% endfor %}
+
+
+</body>
+</html>

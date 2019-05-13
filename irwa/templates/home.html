@@ -1,0 +1,21 @@
+<!--<html>-->
+<!--<head>-->
+    <!--<title>HW3 Part(g): Interface for parts (a), (b) and (c)</title>-->
+<!--</head>-->
+    <!--<body>-->
+        <!--<p style="font-size:28px;">Enter the name of any video game you'd like to find a sweet deal for</p>-->
+        <!--<form action="" method="post">-->
+        <!--Game Title: <input type="text" name="title">-->
+        <!--<input type="Submit">-->
+        <!--</form>-->
+<!--</body>-->
+<!--</html>-->
+<!DOCTYPE html>
+<html lang="en">
+<form action="" method="post">
+   {% csrf_token %}
+    <p style="font-size:28px;">Enter the name of any video game you'd like to find a deal for!</p>
+   Game Title:<input type="text" class="form-control" id="title" name='title'>
+   <input type="submit" value="Submit">
+</form>
+</html>
