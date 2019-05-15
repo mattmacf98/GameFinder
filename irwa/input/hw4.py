@@ -19,14 +19,20 @@ def getInfoFromCard_ebay(listItem, game):
         title = t.group(0)
         title = title[0:title.index('</h3>')]
         title = title[title.index('\">') + 2:]
+    else:
+        return
 
     price = 0
+    if soup.find('span', {"class": "s-item__price"}) == None:
+        return
     price = soup.find('span', {"class": "s-item__price"}).text
     if len(price) > 6:
         # sometimes need to click to see the price :(
         return
 
     link = ''
+    if soup.find('a', {"class": "s-item__link"}) == None:
+        return
     link = soup.find('a', {"class": "s-item__link"})['href']
 
     if price is not 0 and title is not '' and link is not '':
@@ -65,6 +71,8 @@ def getInfoFromCard_deep_discount(listItem, game):
         return
 
     # now get the link href
+    if link_soup.find('a') == None:
+        return
     link = "https://www.deepdiscount.com" + link_soup.find('a')['href']
 
     price_group = soup.find('div', {"class": "aec-custprice"})
@@ -73,6 +81,8 @@ def getInfoFromCard_deep_discount(listItem, game):
 
     price = 0
     price_soup = BeautifulSoup(str(price_group), 'html.parser')
+    if price_soup.find('span') == None:
+        return
     price = price_soup.find('span').text
 
     if price is not 0 and title is not '' and link is not '':
@@ -98,6 +108,8 @@ def getInfoFromCard_new_egg(listItem, game):
 
     # get the header for the card whichc contains the link and title
     header = soup.find("a", {"class": "item-title"})
+    if header == None:
+        return
     title = header.text
     title = title.lower()
     title = re.sub(r"[,:\.!\?']", "", title)
@@ -139,6 +151,8 @@ def getInfoFromCard_game_over_games(listItem, game):
 
     # get the title and price from the div components
     header = soup.find("div", {"class": "element"})
+    if header == None:
+        return
     title = header['data-alpha']
     title = title.lower()
     title = re.sub(r"[,:\.!\?']", "", title)
@@ -150,6 +164,8 @@ def getInfoFromCard_game_over_games(listItem, game):
         # if the title does not match the regex, do not include this game in the results
         return
 
+    if soup.find('a', {"class": "hoverBorder"}) == None:
+        return
     link = "https://gameovervideogames.com/" + soup.find('a', {"class": "hoverBorder"})['href']
 
     if price is not 0 and title is not '' and link is not '':
