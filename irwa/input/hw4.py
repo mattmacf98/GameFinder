@@ -114,6 +114,8 @@ def getInfoFromCard_new_egg(listItem, game):
 
     price = 0
     price_soup = BeautifulSoup(str(price_group), 'html.parser')
+    if (price_soup.find('strong') == None or price_soup.find('sup')== None):
+        return
     price = float(price_soup.find('strong').text)
     price = price + float(price_soup.find('sup').text)
 
