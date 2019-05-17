@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load humanize %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -9,10 +10,10 @@
 <p style="font-size:28px;">Results (from least to most expensive):</p>
 
 <br>
-
 {% for result in results %}
-    {{ result }}
-    <br><br>
+<br>
+${{ result.1|stringformat:".2f"|intcomma}}<br><b>{{ result.0 }}</b> <br>{{ result.2|urlize }} <br>
+    <br> ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ <br>
 {% endfor %}
 
 

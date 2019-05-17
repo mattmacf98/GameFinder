@@ -83,7 +83,7 @@ def get_info_dd(list_item, game):
     price = price_soup.find('span').text
 
     if price is not 0 and title is not '' and link is not '':
-        return (title, float(price[1:]), link)
+        return title, float(price[1:]), link
 
 
 def get_games_dd(url, html, game):

@@ -1,13 +1,10 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from urllib import request
 from .forms import GameForm
-from input import hw4
-
+from input import game_search as gs
 import re
+
 
 def get_game(request):
     if request.method == 'POST':
@@ -33,35 +30,35 @@ def game_search(title):
     title = title.lower()
     title = re.sub(r"[,:\.!\?']", "", title)
 
-    urlEbay = "https://www.ebay.com/sch/i.html?_from=R40&_nkw=" + title.replace(" ", "+") + "&LH_BIN=1"
-    req = request.urlopen(urlEbay)
+    ebay_url = "https://www.ebay.com/sch/i.html?_from=R40&_nkw=" + title.replace(" ", "+") + "&LH_BIN=1"
+    req = request.urlopen(ebay_url)
     html = req.read()
-    ebay_results = hw4.get_video_games_ebay(urlEbay, html, title)
+    ebay_results = gs.get_games_ebay(ebay_url, html, title)
 
-    urlDeepDiscount = "https://www.deepdiscount.com/search?q=" + title.replace(" ", "+")
-    req = request.urlopen(urlDeepDiscount)
+    dd_url = "https://www.deepdiscount.com/search?q=" + title.replace(" ", "+")
+    req = request.urlopen(dd_url)
     html = req.read()
-    deepdiscount_results = hw4.get_video_games_deep_discount(urlDeepDiscount, html, title)
+    dd_results = gs.get_games_dd(dd_url, html, title)
 
-    urlNewEgg = "https://www.newegg.com/Product/ProductList.aspx?Submit=ENE&DEPA=0&Order=BESTMATCH&Description=" + title.replace(
-        " ", "+")
-    req = request.urlopen(urlNewEgg)
+    newegg_url = "https://www.newegg.com/Product/ProductList.aspx?Submit=ENE&DEPA=0&Order=BESTMATCH&Description=" \
+                 + title.replace(" ", "+")
+    req = request.urlopen(newegg_url)
     html = req.read()
-    newEgg_results = hw4.get_video_games_new_egg(urlNewEgg, html, title)
+    newegg_results = gs.get_games_newegg(newegg_url, html, title)
 
-    urlGameOverGames = "https://gameovervideogames.com/search?type=product&q=" + title.replace(" ", "+")
-    req = request.urlopen(urlGameOverGames)
+    gog_url = "https://gameovervideogames.com/search?type=product&q=" + title.replace(" ", "+")
+    req = request.urlopen(gog_url)
     html = req.read()
-    gameOverGame_results = hw4.get_video_games_game_over_games(urlGameOverGames, html, title)
+    gog_results = gs.get_games_gog(gog_url, html, title)
 
     results = []
     for i in ebay_results:
         results.append(i)
-    for i in deepdiscount_results:
+    for i in dd_results:
         results.append(i)
-    for i in newEgg_results:
+    for i in newegg_results:
         results.append(i)
-    for i in gameOverGame_results:
+    for i in gog_results:
         results.append(i)
 
     results.sort(key=lambda x: x[1])
