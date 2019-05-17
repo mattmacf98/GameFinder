@@ -4,16 +4,16 @@ from bs4 import BeautifulSoup
 from urllib import request
 
 
-# EBAY
-def getInfoFromCard_ebay(listItem, game):
-    soup = BeautifulSoup(listItem, 'html.parser')
+# EBay
+def get_ebay_info(list_item, game):
+    soup = BeautifulSoup(list_item, 'html.parser')
 
-    string = listItem.lower()
+    string = list_item.lower()
     string = re.sub(r"[,:\.!\?']", "", string)
 
     title_matcher = re.compile(r"<h3 class=\"s-item__title\">.{0,20}" + re.escape(game) + r".{0,40}</h3>")
     t = title_matcher.search(string)
-    title = ""
+
     if t is not None:
         # take away the garbage from the title
         title = t.group(0)
@@ -22,16 +22,14 @@ def getInfoFromCard_ebay(listItem, game):
     else:
         return
 
-    price = 0
-    if soup.find('span', {"class": "s-item__price"}) == None:
+    if soup.find('span', {"class": "s-item__price"}) is None:
         return
     price = soup.find('span', {"class": "s-item__price"}).text
     if len(price) > 6:
         # sometimes need to click to see the price :(
         return
 
-    link = ''
-    if soup.find('a', {"class": "s-item__link"}) == None:
+    if soup.find('a', {"class": "s-item__link"}) is None:
         return
     link = soup.find('a', {"class": "s-item__link"})['href']
 
@@ -39,19 +37,19 @@ def getInfoFromCard_ebay(listItem, game):
         return title, float(price[1:]), link
 
 
-def get_video_games_ebay(url, html, game):
+def get_games_ebay(url, html, game):
     results = []
     soup = BeautifulSoup(html, 'html.parser')
     for listItem in soup.find_all("li", {"class": "s-item"}):
-        res = getInfoFromCard_ebay(str(listItem), game)
+        res = get_ebay_info(str(listItem), game)
         if res is not None:
             results.append(res)
     return results
 
 
-# DEEPDISCOUNT
-def getInfoFromCard_deep_discount(listItem, game):
-    soup = BeautifulSoup(listItem, 'html.parser')
+# DeepDiscount
+def get_info_dd(list_item, game):
+    soup = BeautifulSoup(list_item, 'html.parser')
 
     # get the header for the card whichc contains the link and title
     header = soup.find("a", {"class": "aec-listlink"})
@@ -71,7 +69,7 @@ def getInfoFromCard_deep_discount(listItem, game):
         return
 
     # now get the link href
-    if link_soup.find('a') == None:
+    if link_soup.find('a') is None:
         return
     link = "https://www.deepdiscount.com" + link_soup.find('a')['href']
 
@@ -79,9 +77,8 @@ def getInfoFromCard_deep_discount(listItem, game):
     if price_group is None:
         return
 
-    price = 0
     price_soup = BeautifulSoup(str(price_group), 'html.parser')
-    if price_soup.find('span') == None:
+    if price_soup.find('span') is None:
         return
     price = price_soup.find('span').text
 
@@ -89,26 +86,26 @@ def getInfoFromCard_deep_discount(listItem, game):
         return (title, float(price[1:]), link)
 
 
-def get_video_games_deep_discount(url, html, game):
+def get_games_dd(url, html, game):
     results = []
     soup = BeautifulSoup(html, 'html.parser')
     group = soup.find("ul", {"id": "aec-prodgrid"})
 
     li_soup = BeautifulSoup(str(group), 'html.parser')
     for listItem in li_soup.findChildren("li"):
-        res = getInfoFromCard_deep_discount(str(listItem), game)
+        res = get_info_dd(str(listItem), game)
         if res is not None:
             results.append(res)
     return results
 
 
-# NEWEGG
-def getInfoFromCard_new_egg(listItem, game):
-    soup = BeautifulSoup(listItem, 'html.parser')
+# NewEgg
+def get_info_newegg(list_item, game):
+    soup = BeautifulSoup(list_item, 'html.parser')
 
     # get the header for the card whichc contains the link and title
     header = soup.find("a", {"class": "item-title"})
-    if header == None:
+    if header is None:
         return
     title = header.text
     title = title.lower()
@@ -124,9 +121,8 @@ def getInfoFromCard_new_egg(listItem, game):
     if price_group is None:
         return
 
-    price = 0
     price_soup = BeautifulSoup(str(price_group), 'html.parser')
-    if (price_soup.find('strong') == None or price_soup.find('sup')== None):
+    if price_soup.find('strong') is None or price_soup.find('sup') is None:
         return
     price = float(price_soup.find('strong').text)
     price = price + float(price_soup.find('sup').text)
@@ -135,23 +131,23 @@ def getInfoFromCard_new_egg(listItem, game):
         return title, price, link
 
 
-def get_video_games_new_egg(url, html, game):
+def get_games_newegg(url, html, game):
     results = []
     soup = BeautifulSoup(html, 'html.parser')
     for listItem in soup.find_all("div", {"class": "item-container"}):
-        res = getInfoFromCard_new_egg(str(listItem), game)
+        res = get_info_newegg(str(listItem), game)
         if res is not None:
             results.append(res)
     return results
 
 
-# GAMEOVERGAMES
-def getInfoFromCard_game_over_games(listItem, game):
-    soup = BeautifulSoup(listItem, 'html.parser')
+# GameOverGames
+def get_info_gog(list_item, game):
+    soup = BeautifulSoup(list_item, 'html.parser')
 
     # get the title and price from the div components
     header = soup.find("div", {"class": "element"})
-    if header == None:
+    if header is None:
         return
     title = header['data-alpha']
     title = title.lower()
@@ -164,19 +160,19 @@ def getInfoFromCard_game_over_games(listItem, game):
         # if the title does not match the regex, do not include this game in the results
         return
 
-    if soup.find('a', {"class": "hoverBorder"}) == None:
+    if soup.find('a', {"class": "hoverBorder"}) is None:
         return
     link = "https://gameovervideogames.com/" + soup.find('a', {"class": "hoverBorder"})['href']
 
     if price is not 0 and title is not '' and link is not '':
-        return (title, price, link)
+        return title, price, link
 
 
-def get_video_games_game_over_games(url, html, game):
+def get_games_gog(url, html, game):
     results = []
     soup = BeautifulSoup(html, 'html.parser')
     for listItem in soup.find_all("div", {"class": "element"}):
-        res = getInfoFromCard_game_over_games(str(listItem), game)
+        res = get_info_gog(str(listItem), game)
         if res is not None:
             results.append(res)
     return results
@@ -188,35 +184,35 @@ if __name__ == '__main__':
     game = game.lower()
     game = re.sub(r"[,:\.!\?']", "", game)
 
-    urlEbay = "https://www.ebay.com/sch/i.html?_from=R40&_nkw=" + game.replace(" ", "+") + "&LH_BIN=1"
-    req = request.urlopen(urlEbay)
+    ebay_url = "https://www.ebay.com/sch/i.html?_from=R40&_nkw=" + game.replace(" ", "+") + "&LH_BIN=1"
+    req = request.urlopen(ebay_url)
     html = req.read()
-    ebay_results = get_video_games_ebay(urlEbay, html, game)
+    ebay_results = get_games_ebay(ebay_url, html, game)
 
-    urlDeepDiscount = "https://www.deepdiscount.com/search?q=" + game.replace(" ", "+")
-    req = request.urlopen(urlDeepDiscount)
+    dd_url = "https://www.deepdiscount.com/search?q=" + game.replace(" ", "+")
+    req = request.urlopen(dd_url)
     html = req.read()
-    deepdiscount_results = get_video_games_deep_discount(urlDeepDiscount, html, game)
+    dd_results = get_games_dd(dd_url, html, game)
 
-    urlNewEgg = "https://www.newegg.com/Product/ProductList.aspx?Submit=ENE&DEPA=0&Order=BESTMATCH&Description=" + game.replace(
-        " ", "+")
-    req = request.urlopen(urlNewEgg)
+    newegg_url = "https://www.newegg.com/Product/ProductList.aspx?Submit=ENE&DEPA=0&Order=BESTMATCH&Description=" \
+                 + game.replace(" ", "+")
+    req = request.urlopen(newegg_url)
     html = req.read()
-    newEgg_results = get_video_games_new_egg(urlNewEgg, html, game)
+    newegg_results = get_games_newegg(newegg_url, html, game)
 
-    urlGameOverGames = "https://gameovervideogames.com/search?type=product&q=" + game.replace(" ", "+")
-    req = request.urlopen(urlGameOverGames)
+    gog_url = "https://gameovervideogames.com/search?type=product&q=" + game.replace(" ", "+")
+    req = request.urlopen(gog_url)
     html = req.read()
-    gameOverGame_results = get_video_games_game_over_games(urlGameOverGames, html, game)
+    gog_results = get_games_gog(gog_url, html, game)
 
     results = []
     for i in ebay_results:
         results.append(i)
-    for i in deepdiscount_results:
+    for i in dd_results:
         results.append(i)
-    for i in newEgg_results:
+    for i in newegg_results:
         results.append(i)
-    for i in gameOverGame_results:
+    for i in gog_results:
         results.append(i)
 
     results.sort(key=lambda x: x[1])
